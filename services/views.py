@@ -189,7 +189,7 @@ def ups_shipping(access_token, address_data):
                         "BillShipper": {"AccountNumber": "C870V5"}
                     }
                 },
-                "Service": {"Code": "03", "Description": "Express"},
+                "Service": {"Code": address_data["serviceType"], "Description": "Express"},
                 "Package": {
                     "Description": " ",
                     "Packaging": {"Code": "02", "Description": "Nails"},
@@ -218,6 +218,7 @@ def ups_shipping(access_token, address_data):
 
         if response.status_code == 200:
             response_data = response.json()
+            print(response_data)
             total_charges = response_data.get('ShipmentResponse', {}).get('ShipmentResults', {}).get('ShipmentCharges', {}).get('TotalCharges', {}).get('MonetaryValue')
             printdata = response_data.get('ShipmentResponse', {}).get('ShipmentResults', {}).get('PackageResults', {})[0].get('ShippingLabel', {}).get('GraphicImage')
             days = calculate_randomized_days()
@@ -252,6 +253,7 @@ def get_shipping_rate(request):
 
     sender = data.get("sender")
     receiver = data.get("receiver")
+    serviceType = data.get("serviceType")
 
     # Validate that sender and receiver data is provided in the request
     if not all([sender, receiver]):
@@ -264,7 +266,8 @@ def get_shipping_rate(request):
     # Check if the record exists in the database
     existing_record = collection.find_one({
         "sender": sender,
-        "receiver": receiver
+        "receiver": receiver,
+        "sp" : serviceType
     })
 
     if existing_record:
